@@ -1,0 +1,29 @@
+# LeadLink CRM Robots.txt
+# Website: https://leadlink-crm.com
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /pricing
+Allow: /contact
+Allow: /login
+Allow: /register
+Allow: /forgot-password
+Allow: /terms
+Allow: /privacy
+Allow: /features/
+
+# Disallow admin paths
+Disallow: /dashboard
+Disallow: /admin/
+Disallow: /leads/
+Disallow: /customers/
+Disallow: /reports/
+Disallow: /settings/
+
+# Disallow API routes
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://leadlink-crm.com/sitemap.xml 

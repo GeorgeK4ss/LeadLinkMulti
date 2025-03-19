@@ -1,0 +1,82 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function belongsToTenant(tenantId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.tenantId == tenantId;
+    }
+
+    function belongsToCompany(companyId) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.companyId == companyId;
+    }
+
+    // Validate file metadata
+    function hasValidMetadata() {
+      return request.resource.metadata != null &&
+             request.resource.metadata.tenantId is string &&
+             request.resource.metadata.companyId is string;
+    }
+
+    // Validate file size (max 10MB)
+    function isValidFileSize() {
+      return request.resource.size <= 10 * 1024 * 1024;
+    }
+
+    // Validate file type
+    function isAllowedFileType() {
+      return request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType.matches('application/pdf') ||
+             request.resource.contentType.matches('application/msword') ||
+             request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    }
+
+    // Company files
+    match /companies/{companyId}/{allPaths=**} {
+      allow read: if isAuthenticated() && (belongsToCompany(companyId) || isAdmin());
+      allow write: if isAuthenticated() && 
+                     (belongsToCompany(companyId) || isAdmin()) &&
+                     hasValidMetadata() &&
+                     isValidFileSize() &&
+                     isAllowedFileType();
+    }
+
+    // Tenant files
+    match /tenants/{tenantId}/{allPaths=**} {
+      allow read: if isAuthenticated() && 
+                    (belongsToTenant(tenantId) || 
+                     belongsToCompany(resource.metadata.companyId) || 
+                     isAdmin());
+      allow write: if isAuthenticated() && 
+                     (belongsToTenant(tenantId) || 
+                      belongsToCompany(resource.metadata.companyId) || 
+                      isAdmin()) &&
+                     hasValidMetadata() &&
+                     isValidFileSize() &&
+                     isAllowedFileType();
+    }
+
+    // User profile pictures
+    match /users/{userId}/profile/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && 
+                     request.auth.uid == userId &&
+                     request.resource.contentType.matches('image/.*') &&
+                     request.resource.size <= 5 * 1024 * 1024;
+    }
+  }
+} 

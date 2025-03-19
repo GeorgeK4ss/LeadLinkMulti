@@ -1,0 +1,70 @@
+name: Firebase Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      # Use our simpler test for now that doesn't require Firebase emulators
+      - name: Run basic tests
+        run: npx ts-node src/lib/testing/simpleTest.ts
+        
+      # Run E2E tests
+      - name: Run E2E tests
+        run: node src/lib/testing/e2e-simple.test.js
+      
+      # Generate a combined test report
+      - name: Generate test report
+        run: |
+          echo "# Test Results" > test-report.md
+          echo "## Basic Tests" >> test-report.md
+          npx ts-node src/lib/testing/simpleTest.ts | tee -a test-report.md
+          echo "## E2E Tests" >> test-report.md
+          node src/lib/testing/e2e-simple.test.js | tee -a test-report.md
+      
+      # Disabled for now until we resolve Firebase emulator issues
+      # - name: Setup Firebase Emulators
+      #   run: |
+      #     npm install -g firebase-tools
+      #     firebase setup:emulators:firestore
+      #     firebase setup:emulators:auth
+      #     firebase setup:emulators:functions
+      
+      # - name: Start Firebase Emulators
+      #   run: firebase emulators:start --only auth,firestore,functions &
+      #   env:
+      #     FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      
+      # - name: Wait for emulators to start
+      #   run: sleep 10
+      
+      # - name: Run tests
+      #   run: ts-node src/lib/testing/testRunner.ts --output test-results.xml --format junit
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-logs
+          path: |
+            test-results.xml
+            test-output.log
+            test-report.md
+        if: always() 

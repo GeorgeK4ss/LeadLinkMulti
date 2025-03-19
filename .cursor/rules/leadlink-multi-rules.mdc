@@ -1,0 +1,201 @@
+---
+description: All System
+globs: 
+alwaysApply: false
+---
+1. Security & Data Protection
+	•	Never expose sensitive data (e.g., API keys, passwords, Firebase credentials).
+	•	Limit Firestore queries to prevent exposing excessive tenant data.
+	•	Ensure Firestore security rules allow only authorized users to access relevant data.
+	•	Use environment variables (.env) for API keys and configurations.
+	•	Never hardcode values—all configurations should be dynamic.
+
+⸻
+
+2. Firestore Query Optimization
+	•	Minimize read and write operations (batch operations where possible).
+	•	Use Firestore indexes to improve query performance.
+	•	Paginate results instead of retrieving large datasets at once.
+	•	Structure data for fast lookups (e.g., avoid deep nesting that requires multiple reads).
+
+⸻
+
+3. Role-Based Access Control (RBAC)
+	•	Users should only access their own data (except admins).
+	•	Define role-based permissions for Admin, Company, and Tenant.
+	•	Enforce strict access control rules in Firestore (match /collection/{doc}).
+	•	Restrict writes to prevent unauthorized data changes.
+
+⸻
+
+4. System Scalability & Multi-Tenant Design
+	•	Each tenant should have isolated data (Firestore partitioning, sub-collections).
+	•	Use Firestore rules to restrict tenant access based on tenantId.
+	•	Use a shared infrastructure while ensuring data segregation.
+	•	Enforce per-tenant rate limits to prevent abuse.
+
+⸻
+
+5. Backend (Cloud Functions) Best Practices
+	•	Use Firestore triggers responsibly (avoid infinite loops).
+	•	Validate input data before processing requests.
+	•	Optimize cold start times by limiting dependencies.
+	•	Implement logging & monitoring for errors and performance.
+
+⸻
+
+6. UI & State Management Best Practices
+	•	Use React Context for global state management (e.g., auth, user role).
+	•	Ensure responsive UI with Tailwind CSS (Shadcn UI components).
+	•	**Use lazy loading and skeleton screens to improve perceived performance.
+	•	No hardcoded text or values—everything should use dynamic variables.
+	•	Lazy load heavy components to improve performance.
+	•	Use optimistic UI updates to enhance user experience.
+
+⸻
+
+7. API & Security Best Practices
+	•	Rate-limit API requests to prevent abuse.
+	•	Authenticate all API calls before processing.
+	•	Use HTTPS everywhere to encrypt data in transit.
+	•	Sanitize user inputs to prevent injection attacks.
+
+⸻
+
+8. Subscription & Payment Handling
+	•	Check subscription status before allowing access to premium features.
+	•	Enforce plan limitations (e.g., lead count, storage limits).
+	•	Implement graceful expiration handling for expired subscriptions.
+
+⸻
+
+9. UI/UX Best Practices
+	•	Use Skeleton screens for loading states.
+	•	Implement Lazy Loading for large components.
+	•	Use Shadcn UI for consistency and modern design.
+	•	All values should be dynamic—no hardcoded values in UI, configs, or logic.
+	•	How to use Shadcn UI components:
+		• Import components from your ui directory:
+		  ```tsx
+		  import { Button } from "@/components/ui/button";
+		  import { Input } from "@/components/ui/input";
+		  ```
+		• Use them in your components:
+		  ```tsx
+		  export function MyComponent() {
+		    return (
+		      <div>
+		        <Input placeholder="Enter your name" />
+		        <Button>Click me</Button>
+		      </div>
+		    );
+		  }
+		  ```
+		• Add more components individually if needed:
+		  ```bash
+		  npx shadcn@latest add [component-name]
+		  ```
+
+⸻
+
+
+Add Tailwind CSS
+Components are styled using Tailwind CSS. You need to install Tailwind CSS in your project.
+
+Follow the Tailwind CSS installation instructions to get started.
+
+Add dependencies
+Add the following dependencies to your project:
+
+```bash
+npm add tailwindcss-animate class-variance-authority clsx tailwind-merge lucide-react
+```
+
+Configure path aliases
+Configure the path aliases in your tsconfig.json file.
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+```
+
+The @ alias points to the src directory in your project structure.
+
+Configure styles
+Add the following to your styles/globals.css file:
+
+```css
+/* src/styles/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    /* Other variables... */
+  }
+  
+  .dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    /* Other dark mode variables... */
+  }
+  
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+```
+
+Add a cn helper
+Create or update your utils.ts file:
+
+```tsx
+// src/lib/utils.ts
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+Create a components.json file
+Create a components.json file in the root of your project:
+
+```json
+// components.json
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.ts",
+    "css": "src/styles/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "iconLibrary": "lucide"
+}
+```

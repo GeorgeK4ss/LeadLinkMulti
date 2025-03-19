@@ -1,0 +1,140 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions for common security checks
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isTenantMember(tenantId) {
+      return isSignedIn() && 
+        exists(/databases/$(database)/documents/userRoles/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/userRoles/$(request.auth.uid)).data.tenantId == tenantId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && 
+        exists(/databases/$(database)/documents/userRoles/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/userRoles/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isTenantAdmin(tenantId) {
+      return isSignedIn() && 
+        exists(/databases/$(database)/documents/userRoles/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/userRoles/$(request.auth.uid)).data.tenantId == tenantId &&
+        get(/databases/$(database)/documents/userRoles/$(request.auth.uid)).data.role == 'tenantAdmin';
+    }
+
+    function hasRole(role) {
+      return isSignedIn() && 
+        exists(/databases/$(database)/documents/userRoles/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/userRoles/$(request.auth.uid)).data.role == role;
+    }
+
+    function isCompanyMember(companyId) {
+      return isSignedIn() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.companyId == companyId;
+    }
+
+    function hasValidSubscription(tenantId) {
+      let tenant = get(/databases/$(database)/documents/tenants/$(tenantId)).data;
+      return tenant.subscriptionStatus == 'active';
+    }
+
+    // System-wide collections accessible by admins
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    match /userRoles/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    match /tenants/{tenantId} {
+      allow read: if isSignedIn() && (isTenantMember(tenantId) || isAdmin());
+      allow write: if isAdmin() || isTenantAdmin(tenantId);
+    }
+
+    match /companies/{companyId} {
+      allow read: if isSignedIn() && (isCompanyMember(companyId) || isAdmin());
+      allow write: if isAdmin() || isTenantAdmin(resource.data.tenantId);
+    }
+
+    // Subscription plans - special access rules
+    match /subscriptionPlans/{planId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /companySubscriptions/{subscriptionId} {
+      allow read: if isSignedIn() && (
+        isCompanyMember(resource.data.companyId) || 
+        isTenantAdmin(resource.data.tenantId) || 
+        isAdmin()
+      );
+      allow write: if isAdmin();
+    }
+
+    // Multi-tenant collections with tenant isolation
+    match /tenants/{tenantId}/leads/{leadId} {
+      allow read: if isSignedIn() && isTenantMember(tenantId) && hasValidSubscription(tenantId);
+      allow create: if isSignedIn() && isTenantMember(tenantId) && hasValidSubscription(tenantId);
+      allow update: if isSignedIn() && isTenantMember(tenantId) && hasValidSubscription(tenantId);
+      allow delete: if isSignedIn() && (isTenantAdmin(tenantId) || isAdmin());
+    }
+
+    match /tenants/{tenantId}/customers/{customerId} {
+      allow read: if isSignedIn() && isTenantMember(tenantId) && hasValidSubscription(tenantId);
+      allow create, update: if isSignedIn() && isTenantMember(tenantId) && hasValidSubscription(tenantId);
+      allow delete: if isSignedIn() && (isTenantAdmin(tenantId) || isAdmin());
+    }
+
+    match /tenants/{tenantId}/activities/{activityId} {
+      allow read: if isSignedIn() && isTenantMember(tenantId);
+      allow create: if isSignedIn() && isTenantMember(tenantId);
+      allow update, delete: if isSignedIn() && (
+        request.auth.uid == resource.data.createdBy || 
+        isTenantAdmin(tenantId) || 
+        isAdmin()
+      );
+    }
+
+    match /tenants/{tenantId}/documents/{documentId} {
+      allow read: if isSignedIn() && isTenantMember(tenantId) && hasValidSubscription(tenantId);
+      allow create: if isSignedIn() && isTenantMember(tenantId) && hasValidSubscription(tenantId);
+      allow update: if isSignedIn() && (
+        request.auth.uid == resource.data.createdBy || 
+        isTenantAdmin(tenantId) || 
+        isAdmin()
+      );
+      allow delete: if isSignedIn() && (isTenantAdmin(tenantId) || isAdmin());
+    }
+
+    match /tenants/{tenantId}/notifications/{notificationId} {
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.userId || 
+        isTenantAdmin(tenantId) || 
+        isAdmin()
+      );
+      allow create: if isSignedIn() && isTenantMember(tenantId);
+      allow update: if isSignedIn() && (
+        request.auth.uid == resource.data.userId || 
+        isTenantAdmin(tenantId)
+      );
+      allow delete: if isSignedIn() && (
+        request.auth.uid == resource.data.userId || 
+        isTenantAdmin(tenantId) || 
+        isAdmin()
+      );
+    }
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+} 

@@ -1,0 +1,23 @@
+{
+  "projects": {
+    "default": "lead-link-multi-tenant",
+    "production": "lead-link-multi-tenant",
+    "staging": "lead-link-multi-tenant-staging",
+    "development": "lead-link-multi-tenant-dev"
+  },
+  "targets": {
+    "default": {
+      "hosting": {
+        "production": [
+          "lead-link-multi-tenant"
+        ],
+        "staging": [
+          "lead-link-multi-tenant-staging"
+        ],
+        "development": [
+          "lead-link-multi-tenant-dev"
+        ]
+      }
+    }
+  }
+} 

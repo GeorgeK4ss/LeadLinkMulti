@@ -1,0 +1,56 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: |
+        cd functions
+        npm ci
+
+    - name: Run Linting
+      run: |
+        cd functions
+        npm run lint
+
+    - name: Build
+      run: |
+        cd functions
+        npm run build
+
+    # Uncomment when tests are added
+    # - name: Run Tests
+    #   run: |
+    #     cd functions
+    #     npm test
+
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+
+    - name: Deploy to Firebase
+      if: github.ref == 'refs/heads/main'
+      run: |
+        npm install -g firebase-tools
+        firebase deploy --only functions 

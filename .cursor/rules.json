@@ -1,0 +1,195 @@
+{
+  "version": "1.0",
+  "rules": {
+    "general": {
+      "name": "General Development Rules",
+      "description": "Overall development guidelines for the CRM project",
+      "patterns": ["**/*.{ts,tsx,js,jsx}"],
+      "rules": [
+        {
+          "name": "No Hardcoded Values",
+          "description": "All configuration values must be in environment variables or constants",
+          "pattern": "process.env.|constants.",
+          "severity": "error"
+        },
+        {
+          "name": "Component Structure",
+          "description": "All components must follow the defined structure",
+          "template": [
+            "import statements",
+            "type definitions",
+            "component definition",
+            "helper functions",
+            "exports"
+          ]
+        },
+        {
+          "name": "Error Handling",
+          "description": "All async operations must use try-catch with proper error handling",
+          "pattern": "try\\s*{[^}]+}\\s*catch\\s*\\([^)]+\\)\\s*{[^}]+}"
+        }
+      ]
+    },
+    "security": {
+      "name": "Security Rules",
+      "description": "Security-related development guidelines",
+      "patterns": ["**/*.{ts,tsx}"],
+      "rules": [
+        {
+          "name": "Firebase Security",
+          "description": "All Firebase operations must include security rules",
+          "required_patterns": [
+            "useAuth\\(\\)",
+            "securityRules"
+          ]
+        },
+        {
+          "name": "API Rate Limiting",
+          "description": "All API endpoints must implement rate limiting",
+          "required_patterns": [
+            "RateLimitConfig",
+            "rateLimiter"
+          ]
+        }
+      ]
+    },
+    "performance": {
+      "name": "Performance Rules",
+      "description": "Performance optimization guidelines",
+      "patterns": ["**/*.{ts,tsx}"],
+      "rules": [
+        {
+          "name": "Lazy Loading",
+          "description": "Large components must use lazy loading",
+          "pattern": "React\\.lazy\\(",
+          "severity": "warning"
+        },
+        {
+          "name": "Skeleton Loading",
+          "description": "All data-dependent components must implement skeleton loading",
+          "required_components": ["Skeleton"]
+        }
+      ]
+    },
+    "database": {
+      "name": "Database Rules",
+      "description": "Firestore and database interaction guidelines",
+      "patterns": ["**/services/**/*.ts", "**/lib/**/*.ts"],
+      "rules": [
+        {
+          "name": "Multi-tenant Data Access",
+          "description": "All database queries must include tenant isolation",
+          "required_patterns": [
+            "tenantId",
+            "companyId"
+          ]
+        },
+        {
+          "name": "Query Optimization",
+          "description": "All Firestore queries must be optimized",
+          "required_patterns": [
+            "limit\\(",
+            "where\\(",
+            "orderBy\\("
+          ]
+        }
+      ]
+    },
+    "components": {
+      "name": "Component Rules",
+      "description": "UI component development guidelines",
+      "patterns": ["**/components/**/*.tsx"],
+      "rules": [
+        {
+          "name": "Shadcn UI Usage",
+          "description": "Use Shadcn UI components when available",
+          "required_imports": ["@/components/ui"]
+        },
+        {
+          "name": "Component Props",
+          "description": "All components must have typed props",
+          "pattern": "interface\\s+\\w+Props"
+        }
+      ]
+    },
+    "monitoring": {
+      "name": "Monitoring Rules",
+      "description": "Error tracking and monitoring guidelines",
+      "patterns": ["**/*.{ts,tsx}"],
+      "rules": [
+        {
+          "name": "Error Tracking",
+          "description": "Critical operations must include error tracking",
+          "required_patterns": [
+            "captureError\\(",
+            "captureException\\("
+          ]
+        },
+        {
+          "name": "Performance Monitoring",
+          "description": "Add performance monitoring for critical paths",
+          "required_patterns": [
+            "measurePerformance\\(",
+            "trackMetric\\("
+          ]
+        }
+      ]
+    },
+    "backup": {
+      "name": "Backup Rules",
+      "description": "Data backup and recovery guidelines",
+      "patterns": ["**/services/**/*.ts"],
+      "rules": [
+        {
+          "name": "Backup Verification",
+          "description": "All backup operations must include verification",
+          "required_patterns": [
+            "verifyBackup\\(",
+            "validateBackup\\("
+          ]
+        }
+      ]
+    },
+    "testing": {
+      "name": "Testing Rules",
+      "description": "Testing requirements and guidelines",
+      "patterns": ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+      "rules": [
+        {
+          "name": "Test Coverage",
+          "description": "All critical paths must have test coverage",
+          "required_patterns": [
+            "describe\\(",
+            "it\\(",
+            "expect\\("
+          ]
+        }
+      ]
+    },
+    "types": {
+      "name": "TypeScript Rules",
+      "description": "TypeScript usage guidelines",
+      "patterns": ["**/*.{ts,tsx}"],
+      "rules": [
+        {
+          "name": "Strict Types",
+          "description": "No any types allowed except in tests",
+          "forbidden_patterns": ["any(?!.*\\.test\\.ts)"],
+          "severity": "error"
+        },
+        {
+          "name": "Interface Naming",
+          "description": "Interface names must be PascalCase",
+          "pattern": "interface\\s+[A-Z][a-zA-Z]+",
+          "severity": "error"
+        }
+      ]
+    }
+  },
+  "globals": {
+    "enforceConsistentImports": true,
+    "enforceErrorBoundaries": true,
+    "enforcePerformanceGuidelines": true,
+    "enforceSecurity": true
+  }
+} 
