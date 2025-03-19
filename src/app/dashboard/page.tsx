@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useClientAuth";
 import { RBACService } from "@/lib/services/rbac";
 import { AdminDashboard } from "@/components/admin/dashboard/AdminDashboard";
 import { CompanyDashboard } from "@/components/company/dashboard/CompanyDashboard";
@@ -75,7 +75,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8 h-screen">
+      <div className="flex items-center justify-center p-8 h-screen" data-testid="dashboard-loading">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading your dashboard...</p>
@@ -90,7 +90,7 @@ export default function DashboardPage() {
 
   if (!role) {
     return (
-      <div className="container mx-auto py-6">
+      <div className="container mx-auto py-6" data-testid="dashboard-no-role">
         <div className="bg-red-50 border-l-4 border-red-400 p-4">
           <div className="flex">
             <div className="ml-3">
@@ -119,13 +119,15 @@ export default function DashboardPage() {
 
   // Fallback
   return (
-    <div className="container mx-auto py-6">
-      <div className="bg-amber-50 border-l-4 border-amber-400 p-4">
-        <div className="flex">
-          <div className="ml-3">
-            <p className="text-sm text-amber-700">
-              Unable to load the appropriate dashboard for your role. Please contact support.
-            </p>
+    <div data-testid="dashboard-summary">
+      <div className="container mx-auto py-6">
+        <div className="bg-amber-50 border-l-4 border-amber-400 p-4">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-sm text-amber-700">
+                Unable to load the appropriate dashboard for your role. Please contact support.
+              </p>
+            </div>
           </div>
         </div>
       </div>
