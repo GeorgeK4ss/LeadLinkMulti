@@ -44,6 +44,8 @@ next-env.d.ts
 firebase-debug.log*
 ui-debug.log*
 emulator-data/
+**/service-account.json
+**/serviceAccountKey.json
 
 # Firebase Functions
 functions/node_modules/
