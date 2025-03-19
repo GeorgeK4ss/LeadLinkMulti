@@ -10,17 +10,28 @@ import {
   setPersistence,
   type User
 } from 'firebase/auth';
-import { auth as firebaseAuth } from './config';
+import { auth as firebaseAuth, getAuth } from './config';
 import { RBACService } from '@/lib/services/rbac';
 
 // Use the exported auth instance from the main firebase.ts
 export const auth = firebaseAuth;
 
-// Set auth persistence to LOCAL (survives browser restart)
-setPersistence(auth, browserLocalPersistence)
-  .catch((error) => {
-    console.error("Firebase auth persistence error:", error);
-  });
+// Only run setPersistence on the client-side
+if (typeof window !== 'undefined') {
+  // Set auth persistence to LOCAL (survives browser restart) but do it with a delay
+  // to ensure auth is properly initialized
+  setTimeout(async () => {
+    try {
+      const initializedAuth = await getAuth();
+      setPersistence(initializedAuth, browserLocalPersistence)
+        .catch((error) => {
+          console.error("Firebase auth persistence error:", error);
+        });
+    } catch (error) {
+      console.error("Error initializing auth for persistence:", error);
+    }
+  }, 100);
+}
 
 // Google provider for authentication
 export const googleProvider = new GoogleAuthProvider();

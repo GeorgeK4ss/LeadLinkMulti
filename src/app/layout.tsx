@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { Inter } from "next/font/google";
 import './globals.css'
 import { Toaster } from "@/components/ui/toaster";
@@ -11,27 +11,54 @@ import { MainNav } from '@/components/MainNav';
 // import { StructuredData } from '@/components/seo/StructuredData'
 // import { ContextHelp } from '@/components/help/ContextHelp'
 
-// Lazy load components for better performance
-const AuthProvider = lazy(() => import('@/hooks/useAuth').then(mod => ({ 
-  default: mod.AuthProvider 
-})));
+// Dynamic imports with client-side only loading
+// Don't load these components during SSR
+const AuthProvider = lazy(() => {
+  // Only load on client-side to avoid Node.js module issues
+  if (typeof window === 'undefined') {
+    return Promise.resolve({ default: ({ children }: { children: React.ReactNode }) => <>{children}</> });
+  }
+  return import('@/hooks/useClientAuth').then(mod => ({ 
+    default: mod.AuthProvider 
+  }));
+});
 
 // Removed RealTimeAlerts
-const RealTimeAlerts = lazy(() => import('@/components/monitoring/RealTimeAlerts').then(mod => ({
-  default: mod.RealTimeAlerts
-})));
+const RealTimeAlerts = lazy(() => {
+  if (typeof window === 'undefined') {
+    return Promise.resolve({ default: () => null });
+  }
+  return import('@/components/monitoring/RealTimeAlerts').then(mod => ({
+    default: mod.RealTimeAlerts
+  }));
+});
 
-const UserFeedback = lazy(() => import('@/components/feedback/UserFeedback').then(mod => ({
-  default: mod.UserFeedback
-})));
+const UserFeedback = lazy(() => {
+  if (typeof window === 'undefined') {
+    return Promise.resolve({ default: () => null });
+  }
+  return import('@/components/feedback/UserFeedback').then(mod => ({
+    default: mod.UserFeedback
+  }));
+});
 
-const StructuredData = lazy(() => import('@/components/seo/StructuredData').then(mod => ({ 
-  default: mod.StructuredData 
-})));
+const StructuredData = lazy(() => {
+  if (typeof window === 'undefined') {
+    return Promise.resolve({ default: () => null });
+  }
+  return import('@/components/seo/StructuredData').then(mod => ({ 
+    default: mod.StructuredData 
+  }));
+});
 
-const ContextHelp = lazy(() => import('@/components/help/ContextHelp').then(mod => ({ 
-  default: mod.ContextHelp 
-})));
+const ContextHelp = lazy(() => {
+  if (typeof window === 'undefined') {
+    return Promise.resolve({ default: () => null });
+  }
+  return import('@/components/help/ContextHelp').then(mod => ({ 
+    default: mod.ContextHelp 
+  }));
+});
 
 // Comment out all initialization services
 // import { initializeAnalytics } from '@/lib/analytics-init';

@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { signIn, signInWithGoogle } from "@/lib/firebase/auth";
+import { useAuth } from "@/hooks/useClientAuth";
 
 export function SignInForm() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,60 +23,31 @@ export function SignInForm() {
     setLoading(true);
 
     try {
-      const { user, error } = await signIn(email, password);
-      if (error) {
-        // Handle specific Firebase errors with more user-friendly messages
-        if (error.message.includes('auth/invalid-login-credentials') || 
-            error.message.includes('auth/invalid-credential') ||
-            error.message.includes('auth/wrong-password') ||
-            error.message.includes('auth/user-not-found')) {
-          setError("Invalid email or password. Please try again.");
-        } else if (error.message.includes('auth/too-many-requests')) {
-          setError("Too many failed login attempts. Please try again later or reset your password.");
-        } else if (error.message.includes('auth/user-disabled')) {
-          setError("This account has been disabled. Please contact support.");
-        } else {
-          setError(error.message);
-        }
-        setLoading(false);
-        return;
-      }
-      
-      if (user) {
-        router.push("/dashboard"); // Redirect to dashboard after successful sign-in
+      await login(email, password);
+      // If login is successful, the useAuth hook will redirect to /dashboard
+    } catch (error: any) {
+      console.error("Login error:", error);
+      // Handle specific Firebase errors with more user-friendly messages
+      if (error.message?.includes('auth/invalid-login-credentials') || 
+          error.message?.includes('auth/invalid-credential') ||
+          error.message?.includes('auth/wrong-password') ||
+          error.message?.includes('auth/user-not-found')) {
+        setError("Invalid email or password. Please try again.");
+      } else if (error.message?.includes('auth/too-many-requests')) {
+        setError("Too many failed login attempts. Please try again later or reset your password.");
+      } else if (error.message?.includes('auth/user-disabled')) {
+        setError("This account has been disabled. Please contact support.");
       } else {
-        setError("Failed to sign in. Please try again.");
-        setLoading(false);
+        setError(error.message || "An unexpected error occurred. Please try again.");
       }
-    } catch (err) {
-      console.error("Login error:", err);
-      setError("An unexpected error occurred. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
-    setError(null);
-    setLoading(true);
-
-    try {
-      const { user, error } = await signInWithGoogle();
-      if (error) {
-        setError(error.message);
-        setLoading(false);
-        return;
-      }
-      if (user) {
-        router.push("/dashboard");
-      } else {
-        setError("Failed to sign in with Google. Please try again.");
-        setLoading(false);
-      }
-    } catch (err) {
-      console.error("Google login error:", err);
-      setError("An unexpected error occurred. Please try again.");
-      setLoading(false);
-    }
+    // Currently not implemented in useClientAuth
+    setError("Sign in with Google is not available at this time.");
   };
 
   return (
@@ -96,6 +68,7 @@ export function SignInForm() {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
+              data-testid="email-input"
             />
           </div>
           <div className="space-y-2">
@@ -107,6 +80,7 @@ export function SignInForm() {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
+              data-testid="password-input"
             />
           </div>
           
@@ -116,7 +90,12 @@ export function SignInForm() {
             </Alert>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={loading}
+            data-testid="login-button"
+          >
             {loading ? "Signing in..." : "Sign In"}
           </Button>
           

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useClientAuth';
 
 export function MainNav() {
   const pathname = usePathname();
