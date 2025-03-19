@@ -1,13 +1,38 @@
 const admin = require('firebase-admin');
 const fs = require('fs');
 const path = require('path');
-const serviceAccount = require('../src/lib/firebase/service-account.json');
+let serviceAccount;
 
-// Initialize Firebase Admin if not already initialized
-if (admin.apps.length === 0) {
+// Initialize Firebase Admin with environment variables if available, otherwise use service account file
+if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+  // Service account from environment variable (base64 encoded)
+  const serviceAccountJson = Buffer.from(
+    process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
+    'base64'
+  ).toString('utf8');
+  
+  serviceAccount = JSON.parse(serviceAccountJson);
+} else if (process.env.FIREBASE_PROJECT_ID) {
+  // For environments with Application Default Credentials
+  admin.initializeApp({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  });
+} else {
+  // Fallback to local service account file
+  try {
+    serviceAccount = require('../src/lib/firebase/service-account.json');
+  } catch (error) {
+    console.error('Failed to load service account:', error);
+    process.exit(1);
+  }
+}
+
+// Initialize the app if we have a service account
+if (serviceAccount) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    storageBucket: `${serviceAccount.project_id}.firebasestorage.app`
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${serviceAccount.project_id}.appspot.com`
   });
 }
 

@@ -8,6 +8,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+env:
+  FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+  FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
 jobs:
   setup:
     name: Setup
