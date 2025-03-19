@@ -81,11 +81,7 @@ const styleTag = `
   }
 `;
 
-// Skip any wrappers or delays
-export const metadata = {
-  title: 'LeadLink - Next.js with Firebase',
-  description: 'A modern CRM application built with Next.js and Firebase',
-};
+// Metadata is now imported from metadata.tsx
 
 export default function RootLayout({
   children,

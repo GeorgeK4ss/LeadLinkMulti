@@ -1,8 +1,11 @@
+// This file contains only the metadata for the application
+// to avoid conflicts with client components
+
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "LeadLink CRM",
-  description: "Modern CRM for managing leads and customers",
+  title: 'LeadLink - Next.js with Firebase',
+  description: 'A modern CRM application built with Next.js and Firebase',
   manifest: "/manifest.json",
   themeColor: "#4f46e5",
   appleWebApp: {
