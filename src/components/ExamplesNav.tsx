@@ -33,6 +33,11 @@ export function ExamplesNav() {
       href: '/examples/admin/company-plans',
       label: 'Company Plan Management',
       description: 'Admin panel for managing company subscriptions'
+    },
+    {
+      href: '/examples/multi-step-wizard',
+      label: 'Multi-Step Wizard',
+      description: 'Demonstrates a multi-step form workflow'
     }
   ];
   
