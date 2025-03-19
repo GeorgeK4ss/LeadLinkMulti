@@ -152,5 +152,4 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 export const useCompany = (): CompanyContextType => {
   return useContext(CompanyContext);
 };
-
-export default useCompany; 
+export default useCompany;
