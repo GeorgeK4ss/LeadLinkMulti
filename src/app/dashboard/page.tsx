@@ -41,13 +41,13 @@ export default function DashboardPage() {
           return;
         }
 
-        setRole(userRole.roleId);
+        setRole(userRole.role);
         setCompanyId(userRole.companyId || null);
         setTenantId(userRole.tenantId || null);
         
         // Store the role in localStorage for quick access
         try {
-          localStorage.setItem(`user_role_${userId}`, userRole.roleId);
+          localStorage.setItem(`user_role_${userId}`, userRole.role);
           // Also store company and tenant IDs if available
           if (userRole.companyId) {
             localStorage.setItem(`user_company_${userId}`, userRole.companyId);
@@ -60,7 +60,7 @@ export default function DashboardPage() {
         }
         
         // Redirect system_admin users to the dedicated admin dashboard
-        if (userRole.roleId === "system_admin") {
+        if (userRole.role === "system_admin") {
           router.push("/admin-dashboard");
         }
       } catch (error) {
