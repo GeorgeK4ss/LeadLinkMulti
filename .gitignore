@@ -46,6 +46,12 @@ ui-debug.log*
 emulator-data/
 **/service-account.json
 **/serviceAccountKey.json
+**/*-service-account.json
+**/*-firebase-adminsdk-*.json
+**/firebase-credentials*.json
+**/firebase-admin*.json
+**/*credentials*.json
+**/*-key.json
 
 # Firebase Functions
 functions/node_modules/
