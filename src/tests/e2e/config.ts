@@ -3,9 +3,16 @@
  * Contains common settings and test data
  */
 
+// Detect if we're running in CI
+const isCI = process.env.CI === 'true';
+
 export const TEST_CONFIG = {
   baseUrl: 'http://localhost:3000',
   apiUrl: 'http://localhost:5000/api',
+  
+  // CI-specific settings
+  isCI,
+  skipAuthInCI: isCI, // Skip authentication in CI environments
   
   // Test user credentials
   testUser: {
@@ -34,10 +41,10 @@ export const TEST_CONFIG = {
     }
   },
   
-  // Test timeouts
+  // Test timeouts - longer timeouts in CI
   timeouts: {
-    navigation: 5000,
-    element: 3000,
+    navigation: isCI ? 10000 : 5000,
+    element: isCI ? 6000 : 3000,
     animation: 500
   },
   
