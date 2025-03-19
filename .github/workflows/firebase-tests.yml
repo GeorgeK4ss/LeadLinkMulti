@@ -25,7 +25,7 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       
       # Use our simpler test for now that doesn't require Firebase emulators
       - name: Run basic tests

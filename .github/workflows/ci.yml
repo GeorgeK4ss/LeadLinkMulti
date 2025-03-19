@@ -91,7 +91,7 @@ jobs:
       
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       
       - name: Run ESLint
         run: npm run lint
@@ -126,7 +126,7 @@ jobs:
       
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       
       - name: Run npm audit
         run: npm audit --audit-level=high
@@ -163,7 +163,7 @@ jobs:
       
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       
       - name: Setup Firebase emulators
         run: |
@@ -207,7 +207,7 @@ jobs:
       
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       
       - name: Create environment file
         run: |
@@ -266,7 +266,7 @@ jobs:
       
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       
       - name: Restore build artifacts
         uses: actions/cache@v3
@@ -316,7 +316,7 @@ jobs:
       
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       
       - name: Restore build artifacts
         uses: actions/cache@v3
@@ -362,7 +362,7 @@ jobs:
       
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       
       - name: Restore build artifacts
         uses: actions/cache@v3
@@ -406,7 +406,7 @@ jobs:
       
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       
       - name: Restore build artifacts
         uses: actions/cache@v3
